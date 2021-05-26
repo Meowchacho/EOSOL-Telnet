@@ -1,5 +1,5 @@
 {
-  "name": "ranvier-telnet",
+  "name": "oesol-telnet",
   "version": "1.0.3",
   "description": "Telnet server and socket with GMCP support",
   "main": "index.js",
@@ -8,19 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shawncplus/ranvier-telnet.git"
+    "url": "git+https://github.com/Meowchacho/oesol-telnet.git"
   },
   "keywords": [
     "telnet",
     "mud",
     "gcmp"
   ],
-  "author": "Shawn Biddle <shawncplus@gmail.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/shawncplus/ranvier-telnet/issues"
-  },
-  "homepage": "https://github.com/shawncplus/ranvier-telnet#readme",
   "dependencies": {
     "wrap-ansi": "^2.0.0"
   }
