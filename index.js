@@ -2,38 +2,40 @@
 
 const EventEmitter = require('events');
 const net = require('net');
+const Colors = require('./Colors');
+const wrap = require('wrap-ansi');
 
 // see: arpa/telnet.h
 const Seq = {
-  IAC     : 255,
-  DONT    : 254,
-  DO      : 253,
-  WONT    : 252,
-  WILL    : 251,
-  SB      : 250,
-  SE      : 240,
-  GA      : 249,
-  EOR     : 239,
+  IAC: 255,
+  DONT: 254,
+  DO: 253,
+  WONT: 252,
+  WILL: 251,
+  SB: 250,
+  SE: 240,
+  GA: 249,
+  EOR: 239,
 };
 
 exports.Sequences = Seq;
 
 const Opts = {
   OPT_ECHO: 1,
-  OPT_EOR : 25,
+  OPT_EOR: 25,
   OPT_GMCP: 201,
 }
 
 exports.Options = Opts;
 
-class TelnetSocket extends EventEmitter
-{
+class TelnetSocket extends EventEmitter {
   constructor(opts = {}) {
     super();
     this.socket = null;
     this.maxInputLength = opts.maxInputLength || 512;
     this.echoing = true;
     this.gaMode = null;
+    this.ansiSupport = 'none';
   }
 
   get readable() {
@@ -52,9 +54,25 @@ class TelnetSocket extends EventEmitter
     this.socket.end(string, enc);
   }
 
-  write(data, encoding) {
+  wrap(message, width = 80) {
+    return this.fixNewlines(wrap(message, width));
+  }
+
+  fixNewlines(message) {
+    // Fix \n not in a \r\n pair to prevent bad rendering on windows
+    message = message.replace(/\r\n/g, '<NEWLINE>').split('\n');
+    message = message.join('\r\n').replace(/<NEWLINE>/g, '\r\n');
+    // fix sty's incredibly stupid default of always appending ^[[0m
+    return message.replace(/\x1B\[0m$/, '');
+  }
+
+  write(data, encoding, width) {
     if (!Buffer.isBuffer(data)) {
-      data = new Buffer(data, encoding);
+      let coloredData = Colors.parseColoredString(data, this.ansiSupport);
+      if (width) {
+        coloredData = this.wrap(coloredData,width);
+      }
+      data = new Buffer(coloredData, encoding);
     }
 
     // escape IACs by duplicating
@@ -174,8 +192,8 @@ class TelnetSocket extends EventEmitter
           bucket.push(databuf[i]);
         } else {
           // look ahead to see if our newline delimiter is part of a combo.
-          if (i+1 < inputlen && (databuf[i+1] === 10 || databuf[i+1 === 13])
-            && databuf[i] !== databuf[i+1]) {
+          if (i + 1 < inputlen && (databuf[i + 1] === 10 || databuf[i + 1 === 13])
+            && databuf[i] !== databuf[i + 1]) {
             i++;
           }
           this.input(Buffer.from(bucket));
@@ -272,7 +290,7 @@ class TelnetSocket extends EventEmitter
           this.emit('WILL', opt);
           i += 3;
           break;
-          /* falls through */
+        /* falls through */
         case Seq.WONT:
           /**
            * @event TelnetSocket#WONT
@@ -340,8 +358,7 @@ class TelnetSocket extends EventEmitter
 
 exports.TelnetSocket = TelnetSocket;
 
-class TelnetServer
-{
+class TelnetServer {
   /**
    * @param {object}   streamOpts options for the stream @see TelnetSocket
    * @param {function} listener   connected callback

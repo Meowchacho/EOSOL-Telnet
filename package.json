@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/shawncplus/ranvier-telnet/issues"
   },
-  "homepage": "https://github.com/shawncplus/ranvier-telnet#readme"
+  "homepage": "https://github.com/shawncplus/ranvier-telnet#readme",
+  "dependencies": {
+    "wrap-ansi": "^2.0.0"
+  }
 }
