@@ -55,7 +55,9 @@ class TelnetSocket extends EventEmitter {
   }
 
   wrap(message, width = 80) {
-    return this.fixNewlines(wrap(message, width));
+    let lStr = wrap(message, width,{'trim':false})
+    lStr = this.fixNewlines(lStr);
+    return lStr;
   }
 
   fixNewlines(message) {
@@ -72,7 +74,7 @@ class TelnetSocket extends EventEmitter {
       if (width) {
         coloredData = this.wrap(coloredData,width);
       }
-      data = new Buffer(coloredData, encoding);
+      data = Buffer.from(coloredData, encoding);
     }
 
     // escape IACs by duplicating
@@ -84,7 +86,7 @@ class TelnetSocket extends EventEmitter {
     }
 
     if (iacs) {
-      let b = new Buffer(data.length + iacs);
+      let b = Buffer.from(data.length + iacs);
       for (let i = 0, j = 0; i < data.length; i++) {
         b[j++] = data[i];
         if (data[i] === Seq.IAC) {

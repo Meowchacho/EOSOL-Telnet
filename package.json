@@ -17,6 +17,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "wrap-ansi": "^2.0.0"
+    "wrap-ansi": "^7.0.0"
   }
 }
