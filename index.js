@@ -56,7 +56,7 @@ class TelnetSocket extends EventEmitter {
 
   wrap(message, width = 80) {
     let lStr = wrap(message, width,{'trim':false})
-    lStr = this.fixNewlines(lStr);
+    lStr = lStr.replaceAll('\n ', '\n');
     return lStr;
   }
 
